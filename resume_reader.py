@@ -48,9 +48,18 @@ class ResumeReader:
         return match.group(0) if match else None
 
     def extract_name(self):
-        # Assume the first non-empty line is the candidate's name
-        lines = [line.strip() for line in self.text.splitlines() if line.strip()]
-        return lines[0].title() if lines else None
+        lines = self.text.strip().split("\n")
+
+        for line in lines[:5]:
+            line = line.strip()
+            if not line or '@' in line or any(char.isdigit() for char in line):
+                continue
+            if re.match(r'^([A-Z][a-z]+(?:\s+[A-Z][a-z]+){1,2})$', line.title()):
+                return line.title()
+        match = re.search(r'([A-Z][a-z]+(?: [A-Z][a-z]+)+)', self.text.title())
+        if match:
+            return match.group(1)
+        return None
 
     def extract_skills(self, all_skills):
         found = []
